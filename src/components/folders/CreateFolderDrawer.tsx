@@ -7,7 +7,7 @@ import { DropZone } from '../ui/DropZone';
 interface CreateFolderDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (name: string, thumbnail?: File) => void;
+  onCreate: (name: string, thumbnailBase64?: string) => void;
 }
 
 export function CreateFolderDrawer({
@@ -16,33 +16,36 @@ export function CreateFolderDrawer({
   onCreate,
 }: CreateFolderDrawerProps) {
   const [name, setName] = useState('');
-  const [thumbnail, setThumbnail] = useState<File | null>(null);
-  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [thumbnailBase64, setThumbnailBase64] = useState<string | null>(null);
 
   const handleCreate = () => {
     if (name.trim()) {
-      onCreate(name.trim(), thumbnail || undefined);
+      onCreate(name.trim(), thumbnailBase64 || undefined);
       setName('');
-      setThumbnail(null);
-      setThumbnailPreview(null);
+      setThumbnailBase64(null);
       onClose();
     }
   };
 
-  const handleFileDrop = (files: FileList) => {
-    if (files.length > 0) {
-      const file = files[0];
-      setThumbnail(file);
-      // Create preview URL
-      const previewUrl = URL.createObjectURL(file);
-      setThumbnailPreview(previewUrl);
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+    });
+  };
+
+  const handleFileDrop = async (files: FileList) => {
+    if (files.length > 0 && files[0].type.startsWith('image/')) {
+      const base64 = await fileToBase64(files[0]);
+      setThumbnailBase64(base64);
     }
   };
 
   const handleClose = () => {
     setName('');
-    setThumbnail(null);
-    setThumbnailPreview(null);
+    setThumbnailBase64(null);
     onClose();
   };
 
@@ -79,19 +82,16 @@ export function CreateFolderDrawer({
         <div className="flex flex-col lg:flex-row gap-8 p-6 max-w-5xl mx-auto">
           {/* Left side - Thumbnail */}
           <div className="lg:w-1/2">
-            {thumbnailPreview ? (
+            {thumbnailBase64 ? (
               <div className="relative rounded-xl overflow-hidden bg-gray-100 aspect-[2/1] shadow-sm">
                 <img
-                  src={thumbnailPreview}
+                  src={thumbnailBase64}
                   alt="Thumbnail preview"
                   className="w-full h-full object-cover"
                 />
                 <button
                   type="button"
-                  onClick={() => {
-                    setThumbnail(null);
-                    setThumbnailPreview(null);
-                  }}
+                  onClick={() => setThumbnailBase64(null)}
                   className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
                 >
                   <span className="text-gray-600 text-lg">✕</span>

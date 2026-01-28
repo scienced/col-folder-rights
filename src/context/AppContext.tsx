@@ -7,6 +7,7 @@ interface AppContextType {
   // Data
   folders: Folder[];
   files: FileItem[];
+  currentScenario: string;
 
   // Folder actions
   addFolder: (name: string, thumbnailUrl?: string) => void;
@@ -21,6 +22,9 @@ interface AppContextType {
   deleteFile: (id: string) => void;
   getFileById: (id: string) => FileItem | undefined;
   getFilesByFolderId: (folderId: string) => FileItem[];
+
+  // Scenario
+  setCurrentScenario: (scenarioId: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -28,6 +32,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [folders, setFolders] = useState<Folder[]>(mockFolders);
   const [files, setFiles] = useState<FileItem[]>(mockFiles);
+  const [currentScenario, setCurrentScenario] = useState<string>('scenario-1');
 
   // Folder actions
   const addFolder = (name: string, thumbnailUrl?: string) => {
@@ -94,6 +99,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       value={{
         folders,
         files,
+        currentScenario,
         addFolder,
         updateFolder,
         deleteFolder,
@@ -104,6 +110,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         deleteFile,
         getFileById,
         getFilesByFolderId,
+        setCurrentScenario,
       }}
     >
       {children}

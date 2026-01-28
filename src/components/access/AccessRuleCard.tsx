@@ -18,7 +18,7 @@ const operatorLabels: Record<string, string> = {
   is_none_of: 'block',
 };
 
-export function AccessRuleCard({ rule, onEdit, readOnly = false }: AccessRuleCardProps) {
+export function AccessRuleCard({ rule, onEdit, onDelete, readOnly = false }: AccessRuleCardProps) {
   return (
     <div className="bg-gray-50 rounded-lg p-4">
       <div className="flex items-start justify-between">
@@ -34,32 +34,35 @@ export function AccessRuleCard({ rule, onEdit, readOnly = false }: AccessRuleCar
                 className={`inline-flex items-center px-3 py-1 text-sm rounded-md ${
                   readOnly
                     ? 'bg-gray-200 text-gray-700'
-                    : 'bg-gray-900 text-white gap-1'
+                    : 'bg-gray-900 text-white'
                 }`}
               >
                 {value}
-                {!readOnly && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // Would remove this specific value
-                    }}
-                    className="hover:text-gray-300"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                )}
               </span>
             ))}
           </div>
         </div>
-        {!readOnly && onEdit && (
-          <button
-            onClick={onEdit}
-            className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <Pencil className="w-4 h-4" />
-          </button>
+        {!readOnly && (
+          <div className="flex items-center gap-1">
+            {onEdit && (
+              <button
+                onClick={onEdit}
+                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                title="Edit rule"
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
+            )}
+            {onDelete && (
+              <button
+                onClick={onDelete}
+                className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                title="Delete rule"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>

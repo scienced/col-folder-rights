@@ -13,7 +13,7 @@ import { FileItem } from '../types';
 export function FolderContentsPage() {
   const { folderId } = useParams<{ folderId: string }>();
   const navigate = useNavigate();
-  const { getFolderById, getFilesByFolderId, updateFolder, updateFile, deleteFile } = useApp();
+  const { getFolderById, getFilesByFolderId, updateFolder, updateFile, deleteFile, deleteFolder } = useApp();
 
   const [isEditFolderModalOpen, setIsEditFolderModalOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<FileItem | null>(null);
@@ -42,6 +42,15 @@ export function FolderContentsPage() {
 
   const handleSaveFolder = (updates: Partial<typeof folder>) => {
     updateFolder(folder.id, updates);
+  };
+
+  const handleDeleteFolder = () => {
+    // Delete all files in the folder
+    files.forEach(file => deleteFile(file.id));
+    // Delete the folder
+    deleteFolder(folder.id);
+    // Navigate back to folder list
+    navigate('/');
   };
 
   const handleFileClick = (file: FileItem) => {
@@ -134,6 +143,7 @@ export function FolderContentsPage() {
         onClose={() => setIsEditFolderModalOpen(false)}
         folder={folder}
         onSave={handleSaveFolder}
+        onDelete={handleDeleteFolder}
         fileCount={files.length}
       />
 

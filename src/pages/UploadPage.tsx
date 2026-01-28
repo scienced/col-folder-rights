@@ -7,12 +7,13 @@ import { DatePicker } from '../components/ui/DatePicker';
 import { AccessManagement } from '../components/access/AccessManagement';
 import { AccessRuleCard } from '../components/access/AccessRuleCard';
 import { useApp } from '../context/AppContext';
-import { UsageChannel, AccessRule } from '../types';
+import { UsageChannel, AccessRule, FileType, FileItem } from '../types';
 
 interface UploadedFile {
   id: string;
   file: File;
   preview: string;
+  base64: string;
   progress: number;
 }
 
@@ -29,7 +30,7 @@ const channelOptions: { id: UsageChannel; label: string }[] = [
 export function UploadPage() {
   const { folderId } = useParams<{ folderId: string }>();
   const navigate = useNavigate();
-  const { getFolderById } = useApp();
+  const { getFolderById, addFile } = useApp();
 
   const folder = folderId ? getFolderById(folderId) : undefined;
   const folderHasAccess = folder ? folder.accessRules.length > 0 : false;
@@ -84,7 +85,7 @@ export function UploadPage() {
     const input = document.createElement('input');
     input.type = 'file';
     input.multiple = true;
-    input.accept = 'image/*,.pdf,.csv,.doc,.docx,.xls,.xlsx';
+    input.accept = 'image/png,image/jpeg,image/jpg,image/gif,image/webp';
     input.onchange = (e) => {
       const files = (e.target as HTMLInputElement).files;
       if (files) {
@@ -94,13 +95,33 @@ export function UploadPage() {
     input.click();
   };
 
-  const addFiles = (fileList: FileList) => {
-    const newFiles: UploadedFile[] = Array.from(fileList).map((file) => ({
-      id: `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      file,
-      preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : '',
-      progress: 100, // Simulating instant upload for mockup
-    }));
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+    });
+  };
+
+  const addFiles = async (fileList: FileList) => {
+    // Filter to only image files
+    const imageFiles = Array.from(fileList).filter(file =>
+      file.type.startsWith('image/')
+    );
+
+    const newFiles: UploadedFile[] = await Promise.all(
+      imageFiles.map(async (file) => {
+        const base64 = await fileToBase64(file);
+        return {
+          id: `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          file,
+          preview: URL.createObjectURL(file),
+          base64,
+          progress: 100, // Simulating instant upload for mockup
+        };
+      })
+    );
     setUploadedFiles([...uploadedFiles, ...newFiles]);
   };
 
@@ -129,10 +150,45 @@ export function UploadPage() {
     setAccessRules(accessRules.filter((r) => r.id !== ruleId));
   };
 
-  const handlePublish = () => {
-    // In a real app, this would upload files to the backend
-    console.log('Publishing files:', uploadedFiles);
-    console.log('Settings:', { channels, startDate, endDate, accessRules });
+  const getFileType = (mimeType: string): FileType => {
+    if (mimeType.includes('png')) return 'PNG';
+    if (mimeType.includes('jpeg') || mimeType.includes('jpg')) return 'JPG';
+    return 'PNG'; // Default for other image types
+  };
+
+  const getImageDimensions = (base64: string): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(`${img.width}x${img.height}`);
+      img.onerror = () => resolve('Unknown');
+      img.src = base64;
+    });
+  };
+
+  const handlePublish = async () => {
+    // Create FileItem objects and add them to context
+    for (const uploadedFile of uploadedFiles) {
+      const resolution = await getImageDimensions(uploadedFile.base64);
+
+      const fileItem: FileItem = {
+        id: uploadedFile.id,
+        folderId: folderId!,
+        name: uploadedFile.file.name,
+        description: '',
+        type: getFileType(uploadedFile.file.type),
+        uploadedAt: new Date().toISOString().split('T')[0],
+        size: formatFileSize(uploadedFile.file.size),
+        resolution,
+        thumbnailUrl: uploadedFile.base64, // Store base64 as thumbnail
+        channels,
+        availabilityStart: startDate || undefined,
+        availabilityEnd: endDate || undefined,
+        accessRules: folderHasAccess ? [] : accessRules, // Use folder rules if folder has access
+      };
+
+      addFile(fileItem);
+    }
+
     navigate(`/folders/${folderId}/files`);
   };
 
@@ -191,6 +247,9 @@ export function UploadPage() {
               <Upload className="w-12 h-12 text-gray-400 mb-4" />
               <p className="text-sm text-gray-600">
                 <span className="text-gray-900 font-medium">Click to upload</span> or drag and drop
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                Images only (PNG, JPG, GIF, WebP)
               </p>
             </div>
 

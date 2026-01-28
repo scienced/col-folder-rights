@@ -13,8 +13,8 @@ export function FolderListPage() {
   // Get root folders (parentId is null)
   const rootFolders = folders.filter((f) => f.parentId === null);
 
-  const handleCreateFolder = (name: string) => {
-    addFolder(name);
+  const handleCreateFolder = (name: string, thumbnailBase64?: string) => {
+    addFolder(name, thumbnailBase64);
   };
 
   return (
