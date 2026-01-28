@@ -26,13 +26,19 @@ const scenarios: Scenario[] = [
   {
     id: 'scenario-3',
     name: 'Scenario 3: Layered security',
-    description: 'Access requires passing BOTH folder AND file rules. Maximum security (funnel logic), but users may be confused when folder access alone doesn\'t grant file access.',
+    description: 'Access requires passing BOTH folder AND file rules. Designed for enterprise security needs (funnel logic), but users may be confused when folder access alone doesn\'t grant file access.',
     available: false,
   },
   {
     id: 'scenario-4',
     name: 'Scenario 4: Folder-only access',
     description: 'Only folder-level access rights exist. File-level access rights are fully removed, regardless of the folder.',
+    available: false,
+  },
+  {
+    id: 'scenario-5',
+    name: 'Scenario 5: Additive access',
+    description: 'Folder rules provide baseline access, file rules can grant additional access but cannot restrict. If folder allows "Sales" and file adds "Marketing", both teams can access.',
     available: false,
   },
 ];
