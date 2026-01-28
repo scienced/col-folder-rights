@@ -52,7 +52,7 @@ export function UploadPage() {
     return (
       <div className="p-6">
         <p className="text-gray-500">Folder not found.</p>
-        <Button variant="secondary" onClick={() => navigate('/')}>
+        <Button variant="secondary" onClick={() => navigate('/download-management')}>
           Back to folders
         </Button>
       </div>

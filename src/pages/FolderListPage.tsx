@@ -23,7 +23,7 @@ export function FolderListPage() {
       <div className="flex items-center justify-between mb-6">
         <Breadcrumb
           items={[
-            { id: 'dm', name: 'Download Management', path: '/' },
+            { id: 'dm', name: 'Download Management', path: '/download-management' },
           ]}
         />
         <Button icon={Plus} onClick={() => setIsCreateDrawerOpen(true)}>

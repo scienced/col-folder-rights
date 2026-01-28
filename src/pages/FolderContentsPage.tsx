@@ -29,7 +29,7 @@ export function FolderContentsPage() {
     return (
       <div className="p-6">
         <p className="text-gray-500">Folder not found.</p>
-        <Button variant="secondary" onClick={() => navigate('/')}>
+        <Button variant="secondary" onClick={() => navigate('/download-management')}>
           Back to folders
         </Button>
       </div>
@@ -50,7 +50,7 @@ export function FolderContentsPage() {
     // Delete the folder
     deleteFolder(folder.id);
     // Navigate back to folder list
-    navigate('/');
+    navigate('/download-management');
   };
 
   const handleFileClick = (file: FileItem) => {
@@ -85,7 +85,7 @@ export function FolderContentsPage() {
       <div className="flex items-center justify-between mb-6">
         <Breadcrumb
           items={[
-            { id: 'dm', name: 'Download Management', path: '/' },
+            { id: 'dm', name: 'Download Management', path: '/download-management' },
             { id: folder.id, name: folder.name, path: `/folders/${folder.id}/files` },
           ]}
         />

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import { AppLayout } from './components/layout/AppLayout';
+import { HomePage } from './pages/HomePage';
 import { FolderListPage } from './pages/FolderListPage';
 import { FolderContentsPage } from './pages/FolderContentsPage';
 import { FileDetailPage } from './pages/FileDetailPage';
@@ -12,8 +13,11 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route element={<AppLayout />}>
-            {/* Root folder view */}
-            <Route path="/" element={<FolderListPage />} />
+            {/* Home page */}
+            <Route path="/" element={<HomePage />} />
+
+            {/* Download Management - folder list */}
+            <Route path="/download-management" element={<FolderListPage />} />
 
             {/* Folder contents (files) */}
             <Route path="/folders/:folderId/files" element={<FolderContentsPage />} />
